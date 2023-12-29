@@ -220,12 +220,9 @@
 			Module.loadFile("game");			
 			Module._setSize(canvas.clientWidth,canvas.clientHeight);		
 			
-		}
-	
-		var rom = base64ToArrayBuffer(file_b64);
-		console.log(rom);
+		}		
 		
-		 Module = {
+		Module = {
 			  canvas: (function () {
 				return document.getElementById("canvas");
 			  })(),
