@@ -1,0 +1,255 @@
+<html>
+	<head>
+		<style>
+			body{
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background:darkgray;
+			}
+			
+			#cover
+			{				
+				background:url("img/box0.png");
+				background-size: 100% auto;
+				width:80vmin;
+				height:80vmin;
+				position:absolute;
+				z-index:2;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				flex-direction:column;
+			}
+			
+			#container{
+				background:url("img/box1.png");
+				background-size: 100% auto;
+				width:80vmin;
+				height:80vmin;
+				position:relative;
+				z-index:1;
+			}
+			
+			div.row{
+				display:flex;
+				align-items: center;
+				justify-content: center;
+				flex-direction:row;
+			}
+			
+			#canvas {
+				position:absolute;
+				margin-left:10.5%;
+				width:75%;
+				height:50%;
+				margin-top:15%;
+				border:3px solid blue;
+				border-radius:5px;
+			}
+			
+			#passbox {
+				background:black;
+				color:white;
+				width:60%;		
+				height:9vmin;
+				text-align:right;
+				padding:2vmin;
+				font-family:Consolas;
+				font-size:15px;
+			}
+			
+			#passbox.ok {
+				color:green;				
+			}
+			
+			#cover .row {			
+				width:100%;
+			}
+			
+			#cover button {
+				width:20%;
+				height:7vmin;
+				background:black;
+				color:yellow;
+				padding:2vmin;
+				font-family:Consolas;
+				font-size:15px;
+			}
+			
+			#cover.ok {	
+				opacity:0;
+				height:0;
+				-webkit-transition: all 1s linear;
+				-moz-transition: all 1s linear;
+				-o-transition: all 1s linear;
+				transition: all 1s linear;
+				pointer-events:none;
+			}
+			
+			#uarr, #larr, #rarr, #darr {
+				position:absolute;
+				width:10%;
+				height:10%;
+			}
+			
+			#uarr {
+				top:70%;
+				left:45%;
+			}
+			
+			#darr {
+				top:80%;
+				left:45%;
+			}
+			
+			#larr {
+				top:75%;
+				left:35%;
+			}
+			
+			#rarr {
+				top:75%;
+				left:55%;
+			}
+		</style>
+	
+	</head>
+	
+	<body>		
+		<div id="container">			
+			<div id="cover"> <!-- style="opacity:0"-->
+				<input id="passbox" type="text" value=""/>				
+				<!--button onclick="Module.loadFile('game');">Go</button-->
+				
+				<div class="row" style="background:black; border-radius:15px 15px 0px 0px;">
+					<button onclick="digit_click('1')">1</button>
+					<button onclick="digit_click('2')">2</button>
+					<button onclick="digit_click('3')">3</button>				
+				</div>
+				<div class="row" style="background:black">
+					<button onclick="digit_click('4')">4</button>
+					<button onclick="digit_click('5')">5</button>
+					<button onclick="digit_click('6')">6</button>				
+				</div>
+				<div class="row" style="background:black; border-radius:0px 0px 15px 15px;">
+					<button onclick="digit_click('7')">7</button>
+					<button onclick="digit_click('8')">8</button>
+					<button onclick="digit_click('9')">9</button>				
+				</div>
+				<div class="row">
+					<button onclick="clear_click()">-</button>
+					<button onclick="digit_click('0')">0</button>
+					<button onclick="go_click()">GO</button>				
+				</div>
+			</div>					
+			<canvas id="canvas" width="240" height="160"></canvas>					
+			<button id="larr" onmousedown="Module._pressKeyLeft()" onmouseup="Module._releaseKeyLeft()" onmouseleave="Module._releaseKeyLeft()" ontouchstart="Module._pressKeyLeft()" ontouchend="Module._releaseKeyLeft()">&larr;</button>								
+			<button id="rarr" onmousedown="Module._pressKeyRight()" onmouseup="Module._releaseKeyRight()" onmouseleave="Module._releaseKeyRight()" ontouchstart="Module._pressKeyRight()" ontouchend="Module._releaseKeyRight()">&rarr;</button>			
+			<button id="uarr" onmousedown="Module._pressKeyUp()" onmouseup="Module._releaseKeyUp()" onmouseleave="Module._releaseKeyUp()" ontouchstart="Module._pressKeyUp()" ontouchend="Module._releaseKeyUp()">&uarr;</button>						
+			<button id="darr" onmousedown="Module._pressKeyDown()" onmouseup="Module._releaseKeyDown()" onmouseleave="Module._releaseKeyDown()" ontouchstart="Module._pressKeyDown()" ontouchend="Module._releaseKeyDown()">&darr;</button>						
+			
+		</div>
+		
+	</body>
+	
+	<script src="mgba.js"></script>	
+	<script src="file.js"></script>	
+	
+	<script src="cryptojs/core-min.js"></script>	
+	<script src="cryptojs/cipher-core-min.js"></script>	
+	<script src="cryptojs/aes-min.js"></script>		
+	<script src="cryptojs/md5-min.js"></script>		
+	<script src="cryptojs/pad-nopadding-min.js"></script>		
+	<script src="cryptojs/enc-base64-min.js"></script>		
+	
+	
+	<script>					
+		var code="";
+		
+		function digit_click(d){
+			code+=d;
+			document.getElementById("passbox").value=code;			
+		}
+		
+		function clear_click(){
+			code="";
+			document.getElementById("passbox").value=code;			
+		}		
+	
+		function go_click(){
+			// "104729"
+			var md5 = CryptoJS.MD5(code).toString();
+			console.log(md5);									
+					
+			var key  = CryptoJS.enc.Hex.parse(md5);
+			var iv   = CryptoJS.enc.Hex.parse("00000000000000000000000000000000");
+						
+			encrypted = file2;// encrypted.toString();						
+			
+			var cipherParams = CryptoJS.lib.CipherParams.create({
+				ciphertext: CryptoJS.enc.Hex.parse(file2)
+			});
+			
+			console.log(cipherParams);
+			
+			try{
+			
+				var decrypted = CryptoJS.AES.decrypt(cipherParams, key, {iv: iv, padding: CryptoJS.pad.NoPadding});
+				
+				function hex2a(hex) {				
+					var str = '';
+					for (var i = 0; i < hex.length; i += 2)
+						str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+					return str;
+				}
+							
+				decrypted = hex2a(decrypted.toString()).split("=")[0]+"=";	
+				var rom = base64ToArrayBuffer(decrypted);
+			}
+			catch(e){				
+				code="";
+				document.getElementById("passbox").value=code;			
+				return;
+			}
+
+			document.getElementById("passbox").className="ok";
+			document.getElementById("cover").className="ok";
+
+			Module.FS.writeFile("game", new Uint8Array(rom));
+			Module.loadFile("game");			
+			Module._setSize(canvas.clientWidth,canvas.clientHeight);		
+			
+		}
+	
+		var rom = base64ToArrayBuffer(file_b64);
+		console.log(rom);
+		
+		 Module = {
+			  canvas: (function () {
+				return document.getElementById("canvas");
+			  })(),
+		};
+		
+		mGBA(Module).then(()=>{
+			window.Module = Module;
+			loaded = true;
+			
+			Module.canvas=canvas;
+			Module._setSpeed(1);
+			Module._unMute();						
+						
+			
+			setTimeout(function(){
+				//Module.loadFile("game");			
+			}, 1000);
+		});		
+		
+		
+		
+		
+		
+		
+	
+	</script>
+</html>
